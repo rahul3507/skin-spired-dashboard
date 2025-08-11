@@ -7,9 +7,6 @@ export default function SettingsPage() {
   const settingsLinks = [
     { title: "Personal Information", href: "/setting/personal-information" },
     { title: "Change Password", href: "/setting/change-password" },
-    // { title: "Terms & Condition", href: "/setting/terms-condition" },
-    { title: "Privacy Policy", href: "/setting/privacy-policy" },
-    { title: "About Us", href: "/setting/about-us" },
   ];
 
   return (

@@ -7,8 +7,7 @@ import {
   LayoutDashboard,
   Users,
   Settings,
-  Notebook,
-  BookAIcon,
+  StrikethroughIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -84,21 +83,15 @@ export default function DashboardSidebar() {
                 label="Users"
                 active={pathname === "/users" || pathname.startsWith("/users")}
               />
-              <NavItem
-                href="/bookingList"
-                icon={Notebook}
-                label="Booking List"
-                active={
-                  pathname === "/bookingList" ||
-                  pathname.startsWith("/bookingList")
-                }
-              />
 
               <NavItem
-                href="/court"
-                icon={BookAIcon}
-                label="Court"
-                active={pathname === "/court" || pathname.startsWith("/court")}
+                href="/skinCondition"
+                icon={StrikethroughIcon}
+                label="Skin Condition"
+                active={
+                  pathname === "/skinCondition" ||
+                  pathname.startsWith("/skinCondition")
+                }
               />
 
               <NavItem

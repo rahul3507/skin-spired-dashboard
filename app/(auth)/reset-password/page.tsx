@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
@@ -21,9 +21,17 @@ export default function CreatePasswordPage() {
 
   const router = useRouter();
 
-  const token = localStorage.getItem("accessToken");
+  const [token, setToken] = useState<string | null>(null);
 
   const [resetPassword] = useResetPasswordMutation();
+
+  // This will run on the client-side only
+  useEffect(() => {
+    const storedToken = localStorage.getItem("accessToken");
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -93,6 +101,10 @@ export default function CreatePasswordPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (!token) {
+    return <div>Loading...</div>; // You can return a loading spinner while waiting for the token
+  }
 
   return (
     <main className="min-h-screen flex">
