@@ -36,6 +36,8 @@ function TransactionTable() {
     limit: itemsPerPage,
   });
 
+  console.log(data);
+
   const transactions = data?.data?.result;
 
   const totalPages = Math.ceil(transactions?.length / itemsPerPage);
@@ -72,9 +74,7 @@ function TransactionTable() {
                 <TableHead className="text-[#FFF] text-lg text-center">
                   User Name
                 </TableHead>
-                <TableHead className="text-[#FFF] text-lg text-center">
-                  Phone Number
-                </TableHead>
+
                 <TableHead className="text-[#FFF] text-lg text-center">
                   Email
                 </TableHead>
@@ -103,12 +103,10 @@ function TransactionTable() {
                   </TableCell>
                   <TableCell className="text-center text-black text-lg">
                     <div className="flex items-center justify-center gap-2">
-                      <span>{user.name}</span>
+                      <span>{user.firstName || "Unknown User"}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center text-black text-lg">
-                    {user.phone}
-                  </TableCell>
+
                   <TableCell className="text-center text-black text-lg">
                     {user.email}
                   </TableCell>
@@ -239,8 +237,8 @@ function TransactionTable() {
 
             {/* User Details */}
             <div className="space-y-6">
-              <DetailRow label="User Name" value={selectedUser?.name} />
-              <DetailRow label="Phone Number" value={selectedUser?.phone} />
+              <DetailRow label="User Name" value={selectedUser?.firstName} />
+
               <DetailRow
                 label="Join Date"
                 value={selectedUser?.createdAt.slice(0, 10)}

@@ -272,10 +272,7 @@ function TransactionTable() {
                 label="User Name"
                 value={selectedUser?.name || "N/A"}
               />
-              <DetailRow
-                label="Phone Number"
-                value={selectedUser?.phone || "N/A"}
-              />
+
               <DetailRow
                 label="Join Date"
                 value={selectedUser?.email || "N/A"}

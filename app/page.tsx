@@ -1,6 +1,5 @@
 "use client";
 
-import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -13,22 +12,15 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+
 import icons from "@/public/icon/user.png";
 import ear from "@/public/icon/earning.png";
-import EarningChart from "@/components/EarningChart";
+
 import {
   useGetStatisticsQuery,
   useGetTransactionsQuery,
 } from "@/redux/feature/dashboardAPI";
 import Loading from "@/components/Loading";
-import UserDetailsModal from "@/components/user-details-modal";
 
 export default function DashboardContent() {
   const { data, isLoading } = useGetStatisticsQuery();
@@ -51,17 +43,18 @@ export default function DashboardContent() {
               icon={icons as any}
             />
             <StatCard
-              title="Total Earnings"
-              value={`$${data?.data?.totalAmount}`}
+              title="Total SkinConditions"
+              value={`${data?.data?.totalSkinConditions}`}
+              icon={ear as any}
+            />
+            <StatCard
+              title="Total Products"
+              value={`${data?.data?.totalProducts}`}
               icon={ear as any}
             />
           </div>
         </div>
       </section>
-
-      <div>
-        <EarningChart />
-      </div>
 
       <section>
         <TransactionTable />
@@ -99,8 +92,6 @@ function StatCard({ title, value, icon }: StatCardProps) {
 }
 
 function TransactionTable() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
@@ -113,20 +104,15 @@ function TransactionTable() {
   const transactions =
     data?.data?.result?.map((item: any) => ({
       id: item.id || item.transactionId, // Adjust based on actual API field names
-      name: item.user?.name || "Unknown User", // Adjust based on actual API field names
-      status: item.status || "Unknown", // Adjust based on actual API field names
+      firstName: item.firstName || "Unknown User", // Directly access firstName here
+      email: item.email || "Unknown", // Adjust based on actual API field names
+      verify: item.verify || "Unknown", // Adjust based on actual API field names
       date: item.createdAt || item.date, // Adjust based on actual API field names, format if needed
-      amount: `$${item.amount || 0}`, // Adjust based on actual API field names
     })) || [];
 
   // Use meta.total for pagination
   const totalPages = Math.ceil((data?.data?.meta?.total || 0) / itemsPerPage);
   const currentTransactions = transactions.slice(0, itemsPerPage); // Already paginated by API, but slice for safety
-
-  const openUserModal = (user: any) => {
-    setSelectedUser(user);
-    setIsModalOpen(true);
-  };
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -146,29 +132,23 @@ function TransactionTable() {
     <>
       <div className="overflow-hidden bg-[#FFFFFF] rounded-md pb-3">
         <h2 className="text-[32px] font-medium text-[#101010] p-6">
-          Recent Transactions
+          Recent User
         </h2>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-gradient-to-br from-blue-600 via-blue-500 to-teal-400 text-white py-8">
               <TableRow className="py-8">
                 <TableHead className="text-[#FFFFFF] text-lg text-center">
-                  #Tr.ID
-                </TableHead>
-                <TableHead className="text-[#FFFFFF] text-lg text-center">
                   User Name
                 </TableHead>
                 <TableHead className="text-[#FFFFFF] text-lg text-center">
-                  Status
+                  Email
                 </TableHead>
                 <TableHead className="text-[#FFFFFF] text-lg text-center">
-                  Date
+                  Joining Date
                 </TableHead>
                 <TableHead className="text-[#FFFFFF] text-lg text-center">
-                  Amount
-                </TableHead>
-                <TableHead className="text-[#FFFFFF] text-lg text-center">
-                  Details
+                  Verify
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -176,30 +156,18 @@ function TransactionTable() {
             <TableBody>
               {currentTransactions?.map((transaction: any) => (
                 <TableRow key={transaction.id}>
-                  <TableCell className="font-medium text-lg text-[#4B5563] text-center">
-                    {transaction.id}
-                  </TableCell>
                   <TableCell className="text-lg text-[#4B5563] text-center">
-                    {transaction.name}
+                    {transaction.firstName}
                   </TableCell>
+
                   <TableCell className="text-lg text-[#4B5563] text-center">
-                    {transaction.status}
+                    {transaction.email}
                   </TableCell>
                   <TableCell className="text-lg text-[#4B5563] text-center">
                     {transaction.date.slice(0, 10)}
                   </TableCell>
                   <TableCell className="text-lg text-[#4B5563] text-center">
-                    {transaction.amount}
-                  </TableCell>
-                  <TableCell className="text-lg text-[#4B5563] text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => openUserModal(transaction)}
-                    >
-                      <Info className="h-6 w-6" />
-                    </Button>
+                    {transaction.verify ? "Verified" : "Not Verified"}
                   </TableCell>
                 </TableRow>
               ))}
@@ -279,14 +247,6 @@ function TransactionTable() {
           </div>
         </div>
       </div>
-
-      {isModalOpen && selectedUser && (
-        <UserDetailsModal
-          user={selectedUser}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
     </>
   );
 }

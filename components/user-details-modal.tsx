@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 interface UserDetailsModalProps {
   user: {
     id: number;
-    name: string;
+    firstName: string;
     status: string;
     date: string;
     amount: string;
@@ -53,7 +53,7 @@ export default function UserDetailsModal({
         <div className="space-y-6">
           <DetailRow label="User ID:" value={userId} />
           <DetailRow label="Date" value={formattedDate} />
-          <DetailRow label="User Name" value={user.name} />
+          <DetailRow label="User Name" value={user.firstName} />
           <DetailRow label="Transaction Amount" value={user.amount} />
           <DetailRow label="Payment Status" value={user.status} />
         </div>
