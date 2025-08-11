@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-import logos from "@/public/banner.png";
+import logos from "@/public/skinSpired.jpg";
 import { useForgetPasswordMutation } from "@/redux/feature/authAPI";
 
 export default function ForgotPasswordPage() {

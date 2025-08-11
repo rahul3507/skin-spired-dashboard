@@ -23,8 +23,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import LogoutModal from "./logout-modal";
 import { useState } from "react";
-
-import logo from "@/public/tenis.jpg";
+import logo from "@/public/skin.png";
 import { logout } from "@/service/authService";
 
 export default function DashboardSidebar() {

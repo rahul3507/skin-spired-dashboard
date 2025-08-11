@@ -5,8 +5,7 @@ import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Lock, Eye, EyeOff } from "lucide-react";
-import logo from "@/public/banner.png";
-
+import logo from "@/public/skinSpired.jpg";
 import { useRouter } from "next/navigation";
 import { useResetPasswordMutation } from "@/redux/feature/authAPI";
 

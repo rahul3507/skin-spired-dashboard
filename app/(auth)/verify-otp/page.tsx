@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
-
-import logo from "@/public/banner.png";
+import logo from "@/public/skinSpired.jpg";
 import { useVerifyEmailMutation } from "@/redux/feature/authAPI";
 import { useRouter } from "next/navigation";
 
