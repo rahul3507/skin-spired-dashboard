@@ -20,7 +20,24 @@ import {
 import { Info, X, Plus, Trash2, Upload } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 
-const SkinCondition = () => {
+// Types
+interface SkinCondition {
+  _id: string;
+  skinType: string;
+  createdAt: string;
+  image?: string;
+  symptmos: string;
+  treatment: string[];
+}
+
+interface EditForm {
+  skinType: string;
+  symptoms: string;
+  treatment: string[];
+  image: File | null;
+}
+
+const SkinConditionPage = () => {
   return (
     <main className="bg-background2 w-full p-4 md:p-6">
       <section>
@@ -30,25 +47,20 @@ const SkinCondition = () => {
   );
 };
 
-export default SkinCondition;
+export default SkinConditionPage;
 
 function SkinConditionTable() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [selectedConditionId, setSelectedConditionId] = useState<string | null>(
     null
   );
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Edit form states
-  const [editForm, setEditForm] = useState<{
-    skinType: string;
-    symptoms: string;
-    treatment: string[];
-    image: File | null;
-  }>({
+  const [editForm, setEditForm] = useState<EditForm>({
     skinType: "",
     symptoms: "",
     treatment: [],
@@ -75,11 +87,10 @@ function SkinConditionTable() {
   const [createSkinCondition, { isLoading: isCreating }] =
     useCreateSkinConditionMutation();
 
-  const conditions = data?.data?.result || [];
+  const conditions: SkinCondition[] = data?.data?.result || [];
   const totalItems = data?.data?.meta?.total || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Initialize edit form when condition details are loaded or for create
   useEffect(() => {
     if (conditionDetails?.data && selectedConditionId) {
       setEditForm({
@@ -133,7 +144,7 @@ function SkinConditionTable() {
     setImagePreview(null);
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
@@ -143,14 +154,14 @@ function SkinConditionTable() {
     setIsEditMode(true);
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: string) => {
     setEditForm((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleTreatmentChange = (index, value) => {
+  const handleTreatmentChange = (index: number, value: string) => {
     const newTreatment = [...editForm.treatment];
     newTreatment[index] = value;
     setEditForm((prev) => ({
@@ -166,7 +177,7 @@ function SkinConditionTable() {
     }));
   };
 
-  const removeTreatment = (index) => {
+  const removeTreatment = (index: number) => {
     const newTreatment = editForm.treatment.filter((_, i) => i !== index);
     setEditForm((prev) => ({
       ...prev,
@@ -174,8 +185,8 @@ function SkinConditionTable() {
     }));
   };
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
     if (file) {
       setEditForm((prev) => ({
         ...prev,
@@ -570,7 +581,7 @@ function SkinConditionTable() {
                           {conditionDetails.data.treatment?.length > 0 ? (
                             <ul className="space-y-2">
                               {conditionDetails.data.treatment.map(
-                                (treatment, index) => (
+                                (treatment: string, index: number) => (
                                   <li
                                     key={index}
                                     className="flex items-start gap-2"
