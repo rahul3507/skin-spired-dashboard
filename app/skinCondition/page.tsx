@@ -284,7 +284,7 @@ function SkinConditionTable() {
           <Table>
             <TableHeader className="bg-gradient-to-br from-blue-600 via-blue-500 to-teal-400 text-black py-8">
               <TableRow>
-                <TableHead className="text-[#FFF] text-lg text-center justify-center items-center">
+                <TableHead className="text-[#FFF] text-lg  justify-center items-center">
                   Skin Type
                 </TableHead>
                 <TableHead className="text-[#FFF] text-lg text-center">
@@ -300,7 +300,7 @@ function SkinConditionTable() {
               {conditions?.map((condition) => (
                 <TableRow key={condition._id}>
                   <TableCell className="text-start text-black text-lg">
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center  gap-2">
                       {condition?.image && (
                         <img
                           src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${condition.image}`}
