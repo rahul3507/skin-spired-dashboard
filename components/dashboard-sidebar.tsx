@@ -1,3 +1,5 @@
+/** @format */
+
 "use client";
 
 import type React from "react";
@@ -91,6 +93,15 @@ export default function DashboardSidebar() {
                 active={
                   pathname === "/skinCondition" ||
                   pathname.startsWith("/skinCondition")
+                }
+              />
+              <NavItem
+                href="/uploadProduct"
+                icon={StrikethroughIcon}
+                label="Upload Product"
+                active={
+                  pathname === "/uploadProduct" ||
+                  pathname.startsWith("/uploadProduct")
                 }
               />
 
