@@ -1,3 +1,5 @@
+/** @format */
+
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const baseApi = createApi({
@@ -15,6 +17,7 @@ export const baseApi = createApi({
     "Settings",
     "Court",
     "Auth",
+    "SkinCondition",
   ],
   endpoints: () => ({}),
 });
