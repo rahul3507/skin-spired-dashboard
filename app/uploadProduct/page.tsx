@@ -17,7 +17,10 @@ import {
   useUpdateProductMutation,
   useCreateProductMutation,
 } from "@/redux/feature/uploadProductAPI";
-import { useGetAllSkinConditionQuery } from "@/redux/feature/skinConditionAPI";
+import {
+  useGetAllSkinConditionQuery,
+  useCreateSkinConditionMutation,
+} from "@/redux/feature/skinConditionAPI";
 import { Info, X, Plus, Trash2, Upload, Eye } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 
@@ -83,6 +86,10 @@ function ProductTable() {
   ]);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
 
+  // Category adding states
+  const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
+  const [newCategoryName, setNewCategoryName] = useState<string>("");
+
   // API hooks
   const { data, isLoading } = useGetAllProductsQuery({
     page: currentPage,
@@ -90,11 +97,12 @@ function ProductTable() {
     search: searchTerm,
   });
 
-  const { data: skinConditionsData } = useGetAllSkinConditionQuery({
-    page: 1,
-    limit: 100,
-    search: "",
-  });
+  const { data: skinConditionsData, refetch: refetchSkinConditions } =
+    useGetAllSkinConditionQuery({
+      page: 1,
+      limit: 100,
+      search: "",
+    });
 
   const { data: productDetails, isLoading: isDetailsLoading } =
     useGetProductByIdQuery(selectedProductId, {
@@ -103,6 +111,8 @@ function ProductTable() {
 
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
+  const [createSkinCondition, { isLoading: isCreatingCategory }] =
+    useCreateSkinConditionMutation();
 
   const products: Product[] = data?.data?.result || [];
   const skinConditions: SkinCondition[] =
@@ -177,6 +187,8 @@ function ProductTable() {
       images: [null, null, null],
     });
     setImagePreviews([null, null, null]);
+    setIsAddingCategory(false);
+    setNewCategoryName("");
   };
 
   const handlePageChange = (page: number) => {
@@ -252,6 +264,21 @@ function ProductTable() {
     const newPreviews = [...imagePreviews];
     newPreviews[index] = null;
     setImagePreviews(newPreviews);
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    try {
+      const newCondition = await createSkinCondition({
+        skinType: newCategoryName,
+      }).unwrap();
+      refetchSkinConditions();
+      setEditForm((prev) => ({ ...prev, skinCondition: newCondition._id }));
+      setNewCategoryName("");
+      setIsAddingCategory(false);
+    } catch (error) {
+      console.error("Failed to create category:", error);
+    }
   };
 
   const handleSave = async () => {
@@ -599,20 +626,85 @@ function ProductTable() {
                         Skin Condition
                       </label>
                       {isEditMode || !selectedProductId ? (
-                        <select
-                          value={editForm.skinCondition}
-                          onChange={(e) =>
-                            handleInputChange("skinCondition", e.target.value)
-                          }
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select one</option>
-                          {skinConditions.map((condition) => (
-                            <option key={condition._id} value={condition._id}>
-                              {condition.skinType}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="border border-gray-300 rounded-lg overflow-hidden">
+                          <div className="space-y-0">
+                            {skinConditions.map((condition) => (
+                              <div
+                                key={condition._id}
+                                className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 ${
+                                  editForm.skinCondition === condition._id
+                                    ? "text-blue-600 font-medium"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleInputChange(
+                                    "skinCondition",
+                                    condition._id
+                                  )
+                                }
+                              >
+                                <div
+                                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                    editForm.skinCondition === condition._id
+                                      ? "border-blue-600"
+                                      : "border-gray-300"
+                                  }`}
+                                >
+                                  {editForm.skinCondition === condition._id && (
+                                    <div className="w-3 h-3 bg-blue-600 rounded-full" />
+                                  )}
+                                </div>
+                                <span>{condition.skinType}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {!isAddingCategory ? (
+                            <div className="p-3 bg-gray-50 border-t border-gray-200">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-start text-gray-700"
+                                onClick={() => setIsAddingCategory(true)}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add New Category
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-gray-50 border-t border-gray-200 space-y-2">
+                              <input
+                                type="text"
+                                value={newCategoryName}
+                                onChange={(e) =>
+                                  setNewCategoryName(e.target.value)
+                                }
+                                placeholder="Enter new category name"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={handleAddCategory}
+                                  disabled={
+                                    isCreatingCategory ||
+                                    !newCategoryName.trim()
+                                  }
+                                  className="flex-1"
+                                >
+                                  {isCreatingCategory ? "Adding..." : "Add"}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setIsAddingCategory(false);
+                                    setNewCategoryName("");
+                                  }}
+                                  className="flex-1"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <div className="p-3 border border-gray-300 rounded-lg bg-gray-50">
                           <span className="text-gray-900">
@@ -731,21 +823,19 @@ function ProductTable() {
                       {!isEditMode &&
                         selectedProductId &&
                         productDetails?.data?.image && (
-                          <div className="grid grid-cols-2 gap-4 mb-4">
-                            {productDetails.data.image
-                              .slice(0, 2)
-                              .map((img, index) => (
-                                <div
-                                  key={index}
-                                  className="aspect-square rounded-lg overflow-hidden bg-gray-100"
-                                >
-                                  <img
-                                    src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${img}`}
-                                    alt={`Product ${index + 1}`}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              ))}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            {productDetails.data.image.map((img, index) => (
+                              <div
+                                key={index}
+                                className="aspect-square rounded-lg overflow-hidden bg-gray-100"
+                              >
+                                <img
+                                  src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${img}`}
+                                  alt={`Product ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ))}
                           </div>
                         )}
 
