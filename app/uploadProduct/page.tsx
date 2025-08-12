@@ -416,7 +416,7 @@ function ProductTable() {
         </div>
 
         {/* Pagination */}
-        <div className="max-w-sm mx-auto flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 mt-6">
+        <div className="max-w-sm mx-auto flex items-center justify-between border-t border-gray-200 rounded-lg bg-gradient-to-br from-blue-600 via-blue-500 to-teal-400 text-black px-4 py-3 mt-6">
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -440,7 +440,7 @@ function ProductTable() {
                 />
               </svg>
             </Button>
-            <span className="text-sm text-gray-600">Previous</span>
+            <span className="text-sm text-[#E6E6E6]">Previous</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -451,7 +451,7 @@ function ProductTable() {
                   variant={page === currentPage ? "default" : "outline"}
                   size="sm"
                   className={`h-8 w-8 p-0 ${
-                    page === currentPage ? "bg-black text-white" : ""
+                    page === currentPage ? "bg-teal-800 text-white" : ""
                   }`}
                   onClick={() => handlePageChange(page)}
                 >
@@ -462,7 +462,7 @@ function ProductTable() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Next</span>
+            <span className="text-sm text-[#E6E6E6]">Next</span>
             <Button
               variant="outline"
               size="sm"
