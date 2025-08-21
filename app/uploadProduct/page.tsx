@@ -30,6 +30,7 @@ import {
 } from "@/redux/feature/skinConditionAPI";
 import { Info, X, Plus, Trash2, Upload, Eye } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 
 // Types
 interface Product {
@@ -156,14 +157,17 @@ function ProductTable() {
         productName: product.productName || "",
         ingredients: product.ingredients || "",
         howToUse: product.howToUse || [],
-        skinCondition: product.skinCondition || "",
+        skinCondition:
+          typeof product.skinCondition === "object"
+            ? product.skinCondition._id
+            : product.skinCondition || "",
         images: [null, null, null],
       });
 
       // Set image previews from existing images
-      const previews = [null, null, null];
+      const previews: (string | null)[] = [null, null, null];
       if (product.image && product.image.length > 0) {
-        product.image.forEach((img, index) => {
+        product.image.forEach((img: string, index: number) => {
           if (index < 3) {
             previews[index] = `${process.env.NEXT_PUBLIC_IMAGE_URL}${img}`;
           }
@@ -330,7 +334,7 @@ function ProductTable() {
 
       closeModal();
       // Optional: Show success message
-      alert(
+      toast.success(
         selectedProductId
           ? "Product updated successfully!"
           : "Product created successfully!"
@@ -338,7 +342,7 @@ function ProductTable() {
     } catch (error) {
       console.error("Failed to save product:", error);
       // Show error message to user
-      alert("Failed to save product. Please try again.");
+      toast.error("Failed to save product. Please try again.");
     }
   };
 
@@ -352,13 +356,16 @@ function ProductTable() {
           productName: product.productName || "",
           ingredients: product.ingredients || "",
           howToUse: product.howToUse || [],
-          skinCondition: product.skinCondition || "",
+          skinCondition:
+            typeof product.skinCondition === "object"
+              ? product.skinCondition._id
+              : product.skinCondition || "",
           images: [null, null, null],
         });
 
-        const previews = [null, null, null];
+        const previews: (string | null)[] = [null, null, null];
         if (product.image && product.image.length > 0) {
-          product.image.forEach((img, index) => {
+          product.image.forEach((img: string, index: number) => {
             if (index < 3) {
               previews[index] = `${process.env.NEXT_PUBLIC_IMAGE_URL}${img}`;
             }
@@ -666,6 +673,7 @@ function ProductTable() {
                                 <SelectItem
                                   key={condition._id}
                                   value={condition._id}
+                                  className="cursor-pointer hover:bg-gray-100"
                                 >
                                   {condition.skinType}
                                 </SelectItem>
@@ -790,18 +798,20 @@ function ProductTable() {
                         selectedProductId &&
                         productDetails?.data?.image && (
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                            {productDetails.data.image.map((img, index) => (
-                              <div
-                                key={index}
-                                className="aspect-square rounded-lg overflow-hidden bg-gray-100"
-                              >
-                                <img
-                                  src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${img}`}
-                                  alt={`Product ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ))}
+                            {productDetails.data.image.map(
+                              (img: string, index: number) => (
+                                <div
+                                  key={index}
+                                  className="aspect-square rounded-lg overflow-hidden bg-gray-100"
+                                >
+                                  <img
+                                    src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${img}`}
+                                    alt={`Product ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )
+                            )}
                           </div>
                         )}
 
@@ -813,9 +823,9 @@ function ProductTable() {
                               <div key={index} className="relative">
                                 <input
                                   type="file"
-                                  ref={(el) =>
-                                    (fileInputRefs.current[index] = el)
-                                  }
+                                  ref={(el) => {
+                                    fileInputRefs.current[index] = el;
+                                  }}
                                   onChange={handleImageChange(index)}
                                   accept="image/*"
                                   className="hidden"
@@ -852,7 +862,9 @@ function ProductTable() {
                           <div className="relative">
                             <input
                               type="file"
-                              ref={(el) => (fileInputRefs.current[2] = el)}
+                              ref={(el) => {
+                                fileInputRefs.current[2] = el;
+                              }}
                               onChange={handleImageChange(2)}
                               accept="image/*"
                               className="hidden"
