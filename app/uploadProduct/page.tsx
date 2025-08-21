@@ -12,6 +12,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   useGetAllProductsQuery,
   useGetProductByIdQuery,
   useUpdateProductMutation,
@@ -97,10 +104,11 @@ function ProductTable() {
     search: searchTerm,
   });
 
+  // Always fetch all skin conditions to ensure they are available
   const { data: skinConditionsData, refetch: refetchSkinConditions } =
     useGetAllSkinConditionQuery({
       page: 1,
-      limit: 100,
+      limit: 1000, // Increased limit to get all conditions
       search: "",
     });
 
@@ -120,11 +128,26 @@ function ProductTable() {
   const totalItems = data?.data?.meta?.total || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Get skin condition name by ID
+  // Enhanced function to get skin condition name by ID
   const getSkinConditionName = (id: string) => {
+    if (!id || !skinConditions || skinConditions.length === 0) {
+      return "Unknown";
+    }
+
     const condition = skinConditions.find((sc) => sc._id === id);
+    console.log("Finding skin condition for ID:", id);
+    console.log("Available skin conditions:", skinConditions);
+    console.log("Found condition:", condition);
+
     return condition?.skinType || "Unknown";
   };
+
+  // Force refetch skin conditions when modal opens
+  useEffect(() => {
+    if (isModalOpen) {
+      refetchSkinConditions();
+    }
+  }, [isModalOpen, refetchSkinConditions]);
 
   useEffect(() => {
     if (productDetails?.data && selectedProductId) {
@@ -266,21 +289,6 @@ function ProductTable() {
     setImagePreviews(newPreviews);
   };
 
-  const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) return;
-    try {
-      const newCondition = await createSkinCondition({
-        skinType: newCategoryName,
-      }).unwrap();
-      refetchSkinConditions();
-      setEditForm((prev) => ({ ...prev, skinCondition: newCondition._id }));
-      setNewCategoryName("");
-      setIsAddingCategory(false);
-    } catch (error) {
-      console.error("Failed to create category:", error);
-    }
-  };
-
   const handleSave = async () => {
     try {
       const formData = new FormData();
@@ -288,32 +296,49 @@ function ProductTable() {
       formData.append("ingredients", editForm.ingredients);
       formData.append("skinCondition", editForm.skinCondition);
 
-      // Add howToUse array
-      editForm.howToUse.forEach((item, index) => {
-        if (item.trim() !== "") {
-          formData.append(`howToUse[${index}]`, item);
-        }
+      // Add howToUse array - filter out empty strings
+      const validHowToUse = editForm.howToUse.filter(
+        (item) => item.trim() !== ""
+      );
+      validHowToUse.forEach((item, index) => {
+        formData.append(`howToUse[${index}]`, item);
       });
 
-      // Add images
+      // Add only new images (File objects)
       editForm.images.forEach((image, index) => {
-        if (image) {
+        if (image instanceof File) {
           formData.append(`image`, image);
         }
       });
 
+      // Debug: Log FormData contents
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
       if (selectedProductId) {
-        await updateProduct({
+        const result = await updateProduct({
           id: selectedProductId,
           data: formData,
         }).unwrap();
+        console.log("Update successful:", result);
       } else {
-        await createProduct(formData).unwrap();
+        const result = await createProduct(formData).unwrap();
+        console.log("Create successful:", result);
       }
 
       closeModal();
+      // Optional: Show success message
+      alert(
+        selectedProductId
+          ? "Product updated successfully!"
+          : "Product created successfully!"
+      );
     } catch (error) {
       console.error("Failed to save product:", error);
+      // Show error message to user
+      alert("Failed to save product. Please try again.");
     }
   };
 
@@ -623,94 +648,35 @@ function ProductTable() {
                     {/* Skin Condition */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Skin Condition
+                        Select Skin Condition
                       </label>
                       {isEditMode || !selectedProductId ? (
-                        <div className="border border-gray-300 rounded-lg overflow-hidden">
-                          <div className="space-y-0">
-                            {skinConditions.map((condition) => (
-                              <div
-                                key={condition._id}
-                                className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 ${
-                                  editForm.skinCondition === condition._id
-                                    ? "text-blue-600 font-medium"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handleInputChange(
-                                    "skinCondition",
-                                    condition._id
-                                  )
-                                }
-                              >
-                                <div
-                                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                    editForm.skinCondition === condition._id
-                                      ? "border-blue-600"
-                                      : "border-gray-300"
-                                  }`}
+                        <div className="space-y-3 border border-gray-200 rounded-lg">
+                          <Select
+                            value={editForm.skinCondition}
+                            onValueChange={(value) =>
+                              handleInputChange("skinCondition", value)
+                            }
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select one" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {skinConditions.map((condition) => (
+                                <SelectItem
+                                  key={condition._id}
+                                  value={condition._id}
                                 >
-                                  {editForm.skinCondition === condition._id && (
-                                    <div className="w-3 h-3 bg-blue-600 rounded-full" />
-                                  )}
-                                </div>
-                                <span>{condition.skinType}</span>
-                              </div>
-                            ))}
-                          </div>
-                          {!isAddingCategory ? (
-                            <div className="p-3 bg-gray-50 border-t border-gray-200">
-                              <Button
-                                variant="ghost"
-                                className="w-full justify-start text-gray-700"
-                                onClick={() => setIsAddingCategory(true)}
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add New Category
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="p-3 bg-gray-50 border-t border-gray-200 space-y-2">
-                              <input
-                                type="text"
-                                value={newCategoryName}
-                                onChange={(e) =>
-                                  setNewCategoryName(e.target.value)
-                                }
-                                placeholder="Enter new category name"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              />
-                              <div className="flex gap-2">
-                                <Button
-                                  onClick={handleAddCategory}
-                                  disabled={
-                                    isCreatingCategory ||
-                                    !newCategoryName.trim()
-                                  }
-                                  className="flex-1"
-                                >
-                                  {isCreatingCategory ? "Adding..." : "Add"}
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => {
-                                    setIsAddingCategory(false);
-                                    setNewCategoryName("");
-                                  }}
-                                  className="flex-1"
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          )}
+                                  {condition.skinType}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       ) : (
                         <div className="p-3 border border-gray-300 rounded-lg bg-gray-50">
                           <span className="text-gray-900">
-                            {getSkinConditionName(
-                              productDetails.data.skinCondition
-                            )}
+                            {productDetails.data.skinCondition.skinType}
                           </span>
                         </div>
                       )}

@@ -1,3 +1,5 @@
+/** @format */
+
 "use client";
 
 import Link from "next/link";
@@ -21,7 +23,7 @@ export default function PersonalInformationPage() {
   useEffect(() => {
     if (userProfile) {
       setUser({
-        name: userProfile?.data?.name,
+        name: userProfile?.data?.firstName,
         email: userProfile?.data?.email,
         phone: userProfile?.data?.phone,
         profileImage:

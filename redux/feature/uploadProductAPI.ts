@@ -32,6 +32,7 @@ const uploadProductAPI = baseApi.injectEndpoints({
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          // Don't set Content-Type for FormData - let the browser set it automatically
         },
         body: data,
       }),
